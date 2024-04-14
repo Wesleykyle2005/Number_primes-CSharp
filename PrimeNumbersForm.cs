@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PrimeNumbers
@@ -9,32 +11,37 @@ namespace PrimeNumbers
         private int firstValue;
         private int secondValue;
         private List<int> primeNumbers = new List<int>();
+        private TaskScheduler _scheduler;
 
         public PrimeNumbersForm()
         {
             InitializeComponent();
+            _scheduler = TaskScheduler.FromCurrentSynchronizationContext();
         }
 
         private void GetFirstValue(object sender, EventArgs e)
         {
-            if (int.TryParse(txtFirstValue.Text, out firstValue) && firstValue >= 0)
+            if (int.TryParse(txtFirstValue.Text, out firstValue) && firstValue >= 1)
             {
                 btnSecond.Enabled = true;
             }
             else
             {
+                btnSecond.Enabled = false;
+                btnCalculate.Enabled = false;
                 txtFirstValue.Text = "";
             }
         }
 
         private void GetSecondValue(object sender, EventArgs e)
         {
-            if (int.TryParse(txtSecondValue.Text, out secondValue) && secondValue >= firstValue)
+            if (int.TryParse(txtSecondValue.Text, out secondValue) && secondValue > firstValue)
             {
                 btnCalculate.Enabled = true;
             }
             else
             {
+                btnCalculate.Enabled = false;
                 txtSecondValue.Text = "";
             }
         }
@@ -44,20 +51,24 @@ namespace PrimeNumbers
             listPrimes.Items.Clear(); // Limpiar la lista antes de calcular nuevos números primos
             primeNumbers.Clear(); // Limpiar la lista de números primos
 
-            for (int number = Math.Max(2, firstValue); number <= secondValue; number++)
+            Task.Factory.StartNew(() =>
             {
-                if (IsPrime(number))
+                for (int number = firstValue; number <= secondValue; number++)
                 {
-                    primeNumbers.Add(number); // Agregar el número primo a la lista
+                    if (IsPrime(number))
+                    {
+                        primeNumbers.Add(number); // Agregar el número primo a la lista
+                    }
                 }
-            }
-
-            // Mostrar los números primos en la lista
-            foreach (int prime in primeNumbers)
+            }).ContinueWith(_ =>
             {
-                listPrimes.Items.Add(prime);
-            }
-            txtCantidad.Text = listPrimes.Items.Count.ToString();
+                // Mostrar los números primos en la lista
+                foreach (int prime in primeNumbers)
+                {
+                    listPrimes.Items.Add(prime);
+                }
+                txtCantidad.Text = listPrimes.Items.Count.ToString();
+            }, CancellationToken.None, TaskContinuationOptions.None, _scheduler);
         }
 
         private bool IsPrime(int number)
@@ -70,10 +81,10 @@ namespace PrimeNumbers
             {
                 if (number % i == 0)
                 {
-                    return false; // No es primo si es divisible por algún número menor que su raíz cuadrada
+                    return false; 
                 }
             }
-            return true; // Es primo si no se encontraron divisores
+            return true; 
         }
 
         private void RestartAll(object sender, EventArgs e)
@@ -82,8 +93,9 @@ namespace PrimeNumbers
             txtSecondValue.Text = "";
             btnCalculate.Enabled = false;
             btnSecond.Enabled = false;
-            primeNumbers.Clear(); // Limpiar la lista de números primos
+            primeNumbers.Clear();
             listPrimes.Items.Clear();
+            txtCantidad.Text = "";
         }
     }
 }
