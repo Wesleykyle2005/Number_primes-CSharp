@@ -57,18 +57,25 @@ namespace PrimeNumbers
                 {
                     if (IsPrime(number))
                     {
-                        primeNumbers.Add(number); // Agregar el número primo a la lista
+                        // Agregar el número primo a la lista dentro del hilo de la interfaz de usuario
+                        listPrimes.Invoke((MethodInvoker)delegate
+                        {
+                            listPrimes.Items.Add(number);
+                            listPrimes.TopIndex = listPrimes.Items.Count - 1;
+                            Thread.Sleep(100);
+                        });
                     }
                 }
             }).ContinueWith(_ =>
             {
-                // Mostrar los números primos en la lista
-                foreach (int prime in primeNumbers)
+                // Actualizar el campo de texto de cantidad cuando se completa el cálculo
+                txtCantidad.Invoke((MethodInvoker)delegate
                 {
-                    listPrimes.Items.Add(prime);
-                }
-                txtCantidad.Text = listPrimes.Items.Count.ToString();
+                    txtCantidad.Text = listPrimes.Items.Count.ToString();
+                });
+
             }, CancellationToken.None, TaskContinuationOptions.None, _scheduler);
+
         }
 
         private bool IsPrime(int number)
