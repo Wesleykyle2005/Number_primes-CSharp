@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -8,9 +9,9 @@ namespace PrimeNumbers
 {
     public partial class PrimeNumbersForm : Form
     {
-        private int firstValue;
-        private int secondValue;
-        private List<int> primeNumbers = new List<int>();
+        private long firstValue;
+        private long secondValue;
+        private List<long> primeNumbers = new List<long>();
         private TaskScheduler _scheduler;
 
         public PrimeNumbersForm()
@@ -21,7 +22,7 @@ namespace PrimeNumbers
 
         private void GetFirstValue(object sender, EventArgs e)
         {
-            if (int.TryParse(txtFirstValue.Text, out firstValue) && firstValue >= 1)
+            if (long.TryParse(txtFirstValue.Text, out firstValue) && firstValue >= 1)
             {
                 btnSecond.Enabled = true;
             }
@@ -35,7 +36,7 @@ namespace PrimeNumbers
 
         private void GetSecondValue(object sender, EventArgs e)
         {
-            if (int.TryParse(txtSecondValue.Text, out secondValue) && secondValue > firstValue)
+            if (long.TryParse(txtSecondValue.Text, out secondValue) && secondValue > firstValue)
             {
                 btnCalculate.Enabled = true;
             }
@@ -53,7 +54,7 @@ namespace PrimeNumbers
 
             Task.Factory.StartNew(() =>
             {
-                for (int number = firstValue; number <= secondValue; number++)
+                for (long number = firstValue; number <= secondValue; number++)
                 {
                     if (IsPrime(number))
                     {
@@ -61,8 +62,8 @@ namespace PrimeNumbers
                         listPrimes.Invoke((MethodInvoker)delegate
                         {
                             listPrimes.Items.Add(number);
-                            listPrimes.TopIndex = listPrimes.Items.Count - 1;
-                            Thread.Sleep(100);
+                            listPrimes.TopIndex = listPrimes.Items.Count -1;
+                            Thread.Sleep(1);
                         });
                     }
                 }
@@ -78,7 +79,7 @@ namespace PrimeNumbers
 
         }
 
-        private bool IsPrime(int number)
+        private bool IsPrime(long number)
         {
             if (number <= 1)
             {

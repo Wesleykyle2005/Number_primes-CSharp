@@ -107,6 +107,7 @@
             listPrimes.BorderStyle = BorderStyle.FixedSingle;
             listPrimes.FormattingEnabled = true;
             listPrimes.HorizontalExtent = 100;
+            listPrimes.HorizontalScrollbar = true;
             listPrimes.IntegralHeight = false;
             listPrimes.ItemHeight = 15;
             listPrimes.Location = new Point(348, 50);
@@ -138,6 +139,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(484, 461);
             Controls.Add(txtCantidad);
             Controls.Add(btnRestart);
@@ -150,7 +152,7 @@
             Controls.Add(btnCalculate);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Name = "PrimeNumbersForm";
-            Text = "PrimeNumbersForm";
+            Text = "Calculo de números primos";
             ResumeLayout(false);
             PerformLayout();
         }
