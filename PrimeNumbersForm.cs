@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PrimeNumbers
@@ -12,12 +11,10 @@ namespace PrimeNumbers
         private long firstValue;
         private long secondValue;
         private List<long> primeNumbers = new List<long>();
-        private TaskScheduler _scheduler;
 
         public PrimeNumbersForm()
         {
             InitializeComponent();
-            _scheduler = TaskScheduler.FromCurrentSynchronizationContext();
         }
 
         private void GetFirstValue(object sender, EventArgs e)
@@ -52,7 +49,7 @@ namespace PrimeNumbers
             listPrimes.Items.Clear(); // Limpiar la lista antes de calcular nuevos números primos
             primeNumbers.Clear(); // Limpiar la lista de números primos
 
-            Task.Factory.StartNew(() =>
+            Thread primeThread = new Thread(() =>
             {
                 for (long number = firstValue; number <= secondValue; number++)
                 {
@@ -62,21 +59,20 @@ namespace PrimeNumbers
                         listPrimes.Invoke((MethodInvoker)delegate
                         {
                             listPrimes.Items.Add(number);
-                            listPrimes.TopIndex = listPrimes.Items.Count -1;
-                            Thread.Sleep(1);
+                            listPrimes.TopIndex = listPrimes.Items.Count - 1;
+                            Thread.Sleep(10);
                         });
                     }
                 }
-            }).ContinueWith(_ =>
+            });
+            primeThread.Start();
+            primeThread.Join(); // Esperar a que el hilo de cálculo de números primos termine
+
+            // Actualizar el campo de texto de cantidad cuando se completa el cálculo
+            txtCantidad.Invoke((MethodInvoker)delegate
             {
-                // Actualizar el campo de texto de cantidad cuando se completa el cálculo
-                txtCantidad.Invoke((MethodInvoker)delegate
-                {
-                    txtCantidad.Text = listPrimes.Items.Count.ToString();
-                });
-
-            }, CancellationToken.None, TaskContinuationOptions.None, _scheduler);
-
+                txtCantidad.Text = listPrimes.Items.Count.ToString();
+            });
         }
 
         private bool IsPrime(long number)
@@ -89,10 +85,10 @@ namespace PrimeNumbers
             {
                 if (number % i == 0)
                 {
-                    return false; 
+                    return false;
                 }
             }
-            return true; 
+            return true;
         }
 
         private void RestartAll(object sender, EventArgs e)
